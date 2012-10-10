@@ -2,6 +2,7 @@ DeviceLocation::Application.routes.draw do
   resources :devices, :except => [:new, :edit]
 
   match 'devices/:id/near' => 'devices#near'
+  match '/devices/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
