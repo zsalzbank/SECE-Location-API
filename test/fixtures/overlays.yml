@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  name: MyString
+  description: MyText
+  geoRefA: 
+  geoRefB: 
+  imgRefAX: 1
+  imgRefAY: 1
+  imgRefBX: 1
+  imgRefBY: 1
+  altitude: 1.5
+
+two:
+  name: MyString
+  description: MyText
+  geoRefA: 
+  geoRefB: 
+  imgRefAX: 1
+  imgRefAY: 1
+  imgRefBX: 1
+  imgRefBY: 1
+  altitude: 1.5

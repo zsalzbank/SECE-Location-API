@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120925020933) do
+ActiveRecord::Schema.define(:version => 20121018014727) do
 
   create_table "devices", :force => true do |t|
     t.string   "name"
@@ -19,6 +19,24 @@ ActiveRecord::Schema.define(:version => 20120925020933) do
     t.float    "altitude",                                                               :default => 0.0
     t.datetime "created_at",                                                                              :null => false
     t.datetime "updated_at",                                                                              :null => false
+  end
+
+  create_table "overlays", :force => true do |t|
+    t.string   "name"
+    t.text     "description"
+    t.spatial  "geoRefA",          :limit => {:srid=>4326, :type=>"point", :geographic=>true},                  :null => false
+    t.spatial  "geoRefB",          :limit => {:srid=>4326, :type=>"point", :geographic=>true},                  :null => false
+    t.integer  "imgRefAX",                                                                                      :null => false
+    t.integer  "imgRefAY",                                                                                      :null => false
+    t.integer  "imgRefBX",                                                                                      :null => false
+    t.integer  "imgRefBY",                                                                                      :null => false
+    t.float    "altitude",                                                                     :default => 0.0
+    t.string   "img_file_name"
+    t.string   "img_content_type"
+    t.integer  "img_file_size"
+    t.datetime "img_updated_at"
+    t.datetime "created_at",                                                                                    :null => false
+    t.datetime "updated_at",                                                                                    :null => false
   end
 
 end

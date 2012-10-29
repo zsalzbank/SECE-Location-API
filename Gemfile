@@ -9,6 +9,7 @@ gem 'pg'
 gem 'activerecord-postgis-adapter'
 gem 'rabl'
 gem 'rack-cors', :require => 'rack/cors'
+gem "paperclip", "~> 3.0"
 
 
 # Gems used only for assets and not required
