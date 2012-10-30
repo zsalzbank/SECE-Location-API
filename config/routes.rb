@@ -7,6 +7,8 @@ DeviceLocation::Application.routes.draw do
 
 
   match '/overlays/:id/img', :controller => 'overlays', :action => 'img'
+
+  match '/safeimage/', :controller => 'safe_images', :action => 'index'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
