@@ -5,10 +5,6 @@ DeviceLocation::Application.routes.draw do
   match 'devices/:id/near' => 'devices#near'
   match '/devices/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
 
-
-  match '/overlays/:id/img', :controller => 'overlays', :action => 'img'
-
-  match '/safeimage/', :controller => 'safe_images', :action => 'index'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
