@@ -1,4 +1,5 @@
 DeviceLocation::Application.routes.draw do
+  resources :areas, :except => [:new, :edit]
   resources :devices, :except => [:new, :edit]
   resources :overlays, :except => [:new, :edit]
 

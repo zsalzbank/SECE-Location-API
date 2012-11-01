@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  name: MyString
+  url_name: MyString
+  altitude: 1.5
+  circle: false
+  center: 
+  radius: 1.5
+  shape: 
+
+two:
+  name: MyString
+  url_name: MyString
+  altitude: 1.5
+  circle: false
+  center: 
+  radius: 1.5
+  shape: 

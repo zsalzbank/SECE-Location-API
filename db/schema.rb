@@ -11,7 +11,19 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121018014727) do
+ActiveRecord::Schema.define(:version => 20121101021458) do
+
+  create_table "areas", :force => true do |t|
+    t.string   "name",                                                                                        :null => false
+    t.string   "url_name",                                                                                    :null => false
+    t.float    "altitude",                                                                 :default => 0.0
+    t.boolean  "circle",                                                                   :default => false
+    t.spatial  "center",     :limit => {:srid=>4326, :type=>"point", :geographic=>true}
+    t.float    "radius"
+    t.spatial  "shape",      :limit => {:srid=>4326, :type=>"polygon", :geographic=>true}
+    t.datetime "created_at",                                                                                  :null => false
+    t.datetime "updated_at",                                                                                  :null => false
+  end
 
   create_table "devices", :force => true do |t|
     t.string   "name"
