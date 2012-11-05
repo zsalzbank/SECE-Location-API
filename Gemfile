@@ -10,6 +10,7 @@ gem 'activerecord-postgis-adapter'
 gem 'rabl'
 gem 'rack-cors', :require => 'rack/cors'
 gem "paperclip", "~> 3.0"
+gem "friendly_id", "~> 4.0.1"
 
 
 # Gems used only for assets and not required
