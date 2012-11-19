@@ -1,6 +1,19 @@
 class AreasController < ApplicationController
   def index
-    @areas = Area.all()
+    @distance = 5000 if not params.has_key?(:distance) else params[:distance].to_f
+    @altitude = params[:altitude] || ""
+
+    if @altitude != ""
+      @altitude = @altitude.to_f
+      @altitude = " AND altitude BETWEEN " + (@altitude - 5).to_s + " AND " + (@altitude + 5).to_s
+    end
+
+    if(params.has_key?(:n) && params.has_key?(:s) && params.has_key?(:e) && params.has_key?(:w))
+        @box = "Geography(ST_Transform(ST_SetSRID(ST_MakeBox2D(ST_MakePoint(" + params[:w] + ", " + params[:s] + "), ST_MakePoint(" + params[:e] + ", " + params[:n] + ")), 4326), 4326))"
+        @areas = Area.where("(circle IS TRUE AND ST_DWithin(center, " + @box + ", ? + radius)) OR (circle IS NOT TRUE AND ST_DWithin(shape, " + @box + ", ?))" + @altitude, @distance, @distance)
+    else
+        @areas = Area.where("1=1" + @altitude)
+    end
   end
 
   def show
@@ -21,22 +34,6 @@ class AreasController < ApplicationController
     render :json => { :success => @a.save }
   end
 
-  def near
-    @distance = 5000 if not params.has_key?(:distance) else params[:distance].to_f
-
-    if(params.has_key?(:id))
-        @areas = []
-    elsif(params.has_key?(:n) && params.has_key?(:s) && params.has_key?(:e) && params.has_key?(:w))
-        @box = "Geography(ST_Transform(ST_SetSRID(ST_MakeBox2D(ST_MakePoint(" + params[:w] + ", " + params[:s] + "), ST_MakePoint(" +
-            params[:e] + ", " + params[:n] + ")), 4326), 4326))"
-        @areas = Area.where("(circle IS TRUE AND ST_DWithin(center, " + @box + ", ? + radius)) OR (circle IS NOT TRUE AND ST_DWithin(shape, " + @box + ", ?))", @distance, @distance)
-    else
-        @areas = []
-    end
-
-    render 'index'
-  end
-
   def within
     slugs = params[:slugs].split('/').reverse
     @areas = Area.find_by_slugs(slugs)
@@ -51,5 +48,10 @@ class AreasController < ApplicationController
         @devices = Device.where("ST_Intersects(location, ST_GeomFromText(?))", @area.shape.to_s)
       end
     end
+  end
+
+  def destroy
+    @a = Area.find(params[:id])
+    render :json => { :success => @a.destroy }
   end
 end
