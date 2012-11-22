@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121104214424) do
+ActiveRecord::Schema.define(:version => 20121122051439) do
 
   create_table "areas", :force => true do |t|
     t.string   "name",                                                                                        :null => false
@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(:version => 20121104214424) do
     t.float    "altitude",                                                               :default => 0.0
     t.datetime "created_at",                                                                              :null => false
     t.datetime "updated_at",                                                                              :null => false
+    t.float    "bearing",                                                                :default => 0.0
   end
 
   create_table "overlays", :force => true do |t|

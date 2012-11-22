@@ -1,5 +1,5 @@
 class Device < ActiveRecord::Base
-  attr_accessible :name, :longitude, :latitude, :altitude
+  attr_accessible :name, :longitude, :latitude, :altitude, :bearing
   validates :name, :longitude, :latitude, :presence => true
   validates :longitude, :latitude, :numericality => true
 
