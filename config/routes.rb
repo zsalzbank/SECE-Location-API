@@ -1,5 +1,5 @@
 DeviceLocation::Application.routes.draw do
-  match 'areas/*slugs/devices', :controller => 'areas', :action => 'within'
+  match 'areas/devices', :controller => 'areas', :action => 'within'
   resources :areas, :except => [:new, :edit]
   match '/areas/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
 
