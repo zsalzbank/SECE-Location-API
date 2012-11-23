@@ -1,1 +1,0 @@
-curl -v -H "Accept: application/json" -H "Content-type: application/json" -X PUT -d '{"id": 2, "name":"Updated","altitude":10.0,"longitude":-3.706635,"latitude":4.849911}'  http://localhost:3000/devices/2.json

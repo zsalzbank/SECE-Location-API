@@ -1,1 +1,0 @@
-curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name":"15 Cove","altitude":0.0,"longitude":-73.706635,"latitude":40.849911}'  http://localhost:3000/devices.json
