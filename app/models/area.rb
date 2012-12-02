@@ -7,7 +7,7 @@ class Area < ActiveRecord::Base
   belongs_to :parent, :class_name => 'Area', :foreign_key => 'parent'
   validates :center, :presence => true, :if => :circle?
   validates :radius, :presence => true, :if => :circle?
-  validates :shape, :presence => true, :if => Proc.new { |a| not a.circle? }
+  validates :shape, :presence => true, :unless => :circle?
 
   set_rgeo_factory_for_column(
     :center,
@@ -60,5 +60,22 @@ class Area < ActiveRecord::Base
     results.delete_if { |x| x.nil? }
     results.uniq { |el| el.id }
     results
+  end
+
+  def self.contains_device(d)
+    location = "ST_GeographyFromText('#{d.location}')"
+
+    where(contains_query(location))
+  end
+
+  def self.contains_query(l)
+    "(" +
+    "(areas.circle IS FALSE AND ST_Intersects(areas.shape, #{l})) OR " +
+    "(areas.circle IS TRUE AND ST_Intersects(ST_Buffer(areas.center, areas.radius), #{l}))" +
+    ")"
+  end
+
+  def self.order_by_size(o = "ASC")
+    select("(CASE WHEN areas.circle THEN (pow(areas.radius, 2) * pi()) ELSE ST_Area(shape) END) As area").order("area " + o)
   end
 end
