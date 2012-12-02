@@ -70,7 +70,7 @@ class Device < ActiveRecord::Base
       buffer = 5 if buffer.blank?
       buffer = buffer.to_f
 
-      where("altitude BETWEEN (#{alt - buffer} AND #{alt + buffer})")
+      where("altitude BETWEEN #{alt - buffer} AND #{alt + buffer}")
     end
   end
 
