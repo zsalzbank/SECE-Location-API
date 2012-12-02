@@ -1,27 +1,22 @@
 class DevicesController < ApplicationController
   def index
-    @distance = params[:distance].to_f || 5000
-    @altitude = params[:altitude] || ""
-
-    if @altitude != ""
-      @altitude = @altitude.to_f
-      @altitude = " AND altitude BETWEEN " + (@altitude - 5).to_s + " AND " + (@altitude + 5).to_s
-    end
-
+    relation = Device
     if params.has_key?(:id)
-      @device = Device.find_by_id(params[:id])
-      if @device
-        @location = Device.find(params[:id]).location.to_s
-        @devices = Device.where("ST_Distance(location, ?) < ? AND id != ?" + @altitude, @location, @distance, params[:id])
-      else
+      device = Device.find_by_id(params[:id])
+      if device
+        relation = relation.direction(device, params[:operator], params[:operator_buffer])
+              .max_distance(device, params[:distance])
+              .where("id != ?", device.id)
+      else 
         @devices = []
+        return
       end
-    elsif(params.has_key?(:n) && params.has_key?(:s) && params.has_key?(:e) && params.has_key?(:w))
-        @box = "Geography(ST_Transform(ST_SetSRID(ST_MakeBox2D(ST_MakePoint(" + params[:w] + ", " + params[:s] + "), ST_MakePoint(" + params[:e] + ", " + params[:n] + ")), 4326), 4326))"
-        @devices = Device.where("ST_DWithin(location, " + @box + ", ?)" + @altitude, @distance)
-    else
-      @devices = Device.where("1=1" + @altitude)
     end
+
+    relation = relation.altitude(params[:altitude], params[:altitude_buffer])
+                       .named_like(params[:like])
+                       .bearing(params[:bearing], params[:bearing_buffer])
+    @devices = relation
   end
 
   def show
@@ -103,63 +98,5 @@ class DevicesController < ApplicationController
             :suggestions => results
         } 
     end
-
-  end
-
-  def test
-    where = params[:where]
-    case where
-        when "front"
-            where=0
-        when "left"
-            where=270
-        when "back"
-            where=180
-        when "right"
-            where=90
-        else
-            where=0
-    end
-    callback = params[:callback]
-    device = Device.find_by_id(params[:id])
-    location = device.location
-    neardist = params[:distance].to_f
-    angle = device.bearing + where
-
-    min_a = (angle - 90) % 360
-    min_a += 360 if min_a < 0
-    max_a = (angle + 90) % 360
-    max_a += 360 if max_a < 0
-
-    min_r = min_a * Math::PI/180
-    max_r = max_a * Math::PI/180
-
-    my_location = "ST_GeographyFromText('#{location}')"
-
-    if max_a - min_a < 0
-        az = "ST_Azimuth(#{my_location}, location) >= #{min_r} OR ST_Azimuth(#{my_location}, location) <= #{max_r}"
-    else
-        az = "ST_Azimuth(#{my_location}, location) BETWEEN #{min_r} AND #{max_r}"
-    end
-
-
-    dist  ="ST_DWithin(#{my_location}, location, #{neardist})"
-
-    @devices = Device.where(az).where(dist)
-    render 'devices/index'
-
-    #location = "ST_GeographyFromText('#{location}')"
-    #buffer = "ST_Buffer(#{location}, #{neardist*2})"
-    #envelope = "ST_Envelope(#{buffer}::geometry)"
-    #rot = "ST_Rotate(#{envelope}, #{rads}, #{location}::geometry)"
-
-    #result = rot
-
-    #v = ActiveRecord::Base.connection().select_one("SELECT ST_AsEWKT(#{result})")
-
-    #f = RGeo::Geographic.spherical_factory
-    #p = f.parse_wkt(v["st_asewkt"].split(";")[1])
-
-    #render :json => p.exterior_ring.points.map { |point| { :lat => point.latitude, :lng => point.longitude } }, :callback => callback
   end
 end
