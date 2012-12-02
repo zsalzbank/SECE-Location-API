@@ -30,7 +30,7 @@ class DevicesController < ApplicationController
 
   def create
     @d = Device.new(params[:device])
-    render :json => { :success => @d.save }
+    render :json => { :success => @d.save, :errors => @d.errors }
   end
 
   def update
@@ -104,5 +104,62 @@ class DevicesController < ApplicationController
         } 
     end
 
+  end
+
+  def test
+    where = params[:where]
+    case where
+        when "front"
+            where=0
+        when "left"
+            where=270
+        when "back"
+            where=180
+        when "right"
+            where=90
+        else
+            where=0
+    end
+    callback = params[:callback]
+    device = Device.find_by_id(params[:id])
+    location = device.location
+    neardist = params[:distance].to_f
+    angle = device.bearing + where
+
+    min_a = (angle - 90) % 360
+    min_a += 360 if min_a < 0
+    max_a = (angle + 90) % 360
+    max_a += 360 if max_a < 0
+
+    min_r = min_a * Math::PI/180
+    max_r = max_a * Math::PI/180
+
+    my_location = "ST_GeographyFromText('#{location}')"
+
+    if max_a - min_a < 0
+        az = "ST_Azimuth(#{my_location}, location) >= #{min_r} OR ST_Azimuth(#{my_location}, location) <= #{max_r}"
+    else
+        az = "ST_Azimuth(#{my_location}, location) BETWEEN #{min_r} AND #{max_r}"
+    end
+
+
+    dist  ="ST_DWithin(#{my_location}, location, #{neardist})"
+
+    @devices = Device.where(az).where(dist)
+    render 'devices/index'
+
+    #location = "ST_GeographyFromText('#{location}')"
+    #buffer = "ST_Buffer(#{location}, #{neardist*2})"
+    #envelope = "ST_Envelope(#{buffer}::geometry)"
+    #rot = "ST_Rotate(#{envelope}, #{rads}, #{location}::geometry)"
+
+    #result = rot
+
+    #v = ActiveRecord::Base.connection().select_one("SELECT ST_AsEWKT(#{result})")
+
+    #f = RGeo::Geographic.spherical_factory
+    #p = f.parse_wkt(v["st_asewkt"].split(";")[1])
+
+    #render :json => p.exterior_ring.points.map { |point| { :lat => point.latitude, :lng => point.longitude } }, :callback => callback
   end
 end

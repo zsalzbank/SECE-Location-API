@@ -6,6 +6,7 @@ DeviceLocation::Application.routes.draw do
   resources :overlays, :except => [:new, :edit]
   match '/overlays/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
 
+  match 'devices/test', :controller => 'devices', :action => 'test'
   match 'devices/lookup', :controller => 'devices', :action => 'lookup'
   resources :devices, :except => [:new, :edit]
   match '/devices/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
