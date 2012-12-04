@@ -63,19 +63,30 @@ class Area < ActiveRecord::Base
   end
 
   def self.contains_device(d)
-    location = "ST_GeographyFromText('#{d.location}')"
-
-    where(contains_query(location))
+    where(contains_device_query(d))
   end
 
-  def self.contains_query(l)
-    "(" +
-    "(areas.circle IS FALSE AND ST_Intersects(areas.shape, #{l})) OR " +
-    "(areas.circle IS TRUE AND ST_Intersects(ST_Buffer(areas.center, areas.radius), #{l}))" +
-    ")"
+  def self.contains_device_query(d)
+    contains_query("ST_GeographyFromText('#{d.location}')")
+  end
+
+  def self.contains_query(l, area = nil)
+    shape = area.nil? ? "areas.shape" : "ST_GeographyFromText('" + area.shape.to_s + "')"
+    center = area.nil? ? "areas.center" : "ST_GeographyFromText('" + area.center.to_s + "')"
+    radius = area.nil? ? "areas.radius" : area.radius
+
+    query = area.nil? ? "((areas.circle IS FALSE AND " : ""
+    query += (area.nil? or (area and not area.circle)) ?
+        "ST_Intersects(#{shape}, #{l})" : ""
+    query += area.nil? ? ") OR (areas.circle IS TRUE AND " : ""
+    query += (area.nil? or (area and area.circle)) ?
+        "ST_Intersects(ST_Buffer(#{center}, #{radius}), #{l})" : ""
+    query += area.nil? ? "))" : ""
+
+    query
   end
 
   def self.order_by_size(o = "ASC")
-    select("(CASE WHEN areas.circle THEN (pow(areas.radius, 2) * pi()) ELSE ST_Area(shape) END) As area").order("area " + o)
+    select("(CASE WHEN areas.circle THEN (pow(areas.radius, 2) * pi()) ELSE ST_Area(shape) END) AS m2").order("m2 " + o)
   end
 end

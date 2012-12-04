@@ -94,6 +94,10 @@ class Device < ActiveRecord::Base
     end
   end
 
+  def self.in_area(area)
+    where(Area.contains_query("devices.location", area))
+  end
+
   private
   def self.angle_between(var, angle, buffer)
     min_a = (angle - buffer) % 360
