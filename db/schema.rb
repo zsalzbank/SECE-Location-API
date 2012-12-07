@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121123191139) do
+ActiveRecord::Schema.define(:version => 20121207024636) do
 
   create_table "areas", :force => true do |t|
     t.string   "name",                                                                                        :null => false
@@ -30,12 +30,14 @@ ActiveRecord::Schema.define(:version => 20121123191139) do
 
   create_table "devices", :force => true do |t|
     t.string   "name"
-    t.spatial  "location",      :limit => {:srid=>4326, :type=>"point", :geographic=>true},                  :null => false
-    t.float    "altitude",                                                                  :default => 0.0
-    t.datetime "created_at",                                                                                 :null => false
-    t.datetime "updated_at",                                                                                 :null => false
-    t.float    "bearing",                                                                   :default => 0.0
+    t.spatial  "location",      :limit => {:srid=>4326, :type=>"point", :geographic=>true},                    :null => false
+    t.float    "altitude",                                                                    :default => 0.0
+    t.datetime "created_at",                                                                                   :null => false
+    t.datetime "updated_at",                                                                                   :null => false
+    t.float    "bearing",                                                                     :default => 0.0
     t.float    "near_distance"
+    t.float    "radius"
+    t.spatial  "shape",         :limit => {:srid=>4326, :type=>"polygon", :geographic=>true}
   end
 
   create_table "overlays", :force => true do |t|

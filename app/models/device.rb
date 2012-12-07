@@ -1,10 +1,12 @@
 class Device < ActiveRecord::Base
-  attr_accessible :name, :longitude, :latitude, :altitude, :bearing, :near_distance
+  attr_accessible :name, :longitude, :latitude, :altitude, :bearing, :near_distance, :radius, :shape
   validates :name, :longitude, :latitude, :presence => true
   validates :longitude, :latitude, :numericality => true
   validates :near_distance, :numericality => true, :allow_nil => true
+  validates :radius, :numericality => true, :allow_nil => true
 
   set_rgeo_factory_for_column(:location, RGeo::Geographic.spherical_factory(:srid => 4326))
+  set_rgeo_factory_for_column(:shape, RGeo::Geographic.spherical_factory(:srid => 4326))
 
   def longitude
     self.location.longitude
@@ -30,6 +32,22 @@ class Device < ActiveRecord::Base
 
   def near_distance
     read_attribute(:near_distance) || 500
+  end
+
+  def circle?
+    self.radius != nil and self.shape == nil
+  end
+
+  def point?
+    self.radius == nil and self.shape == nil
+  end
+
+  def shape_points
+    if self.circle? or self.point?
+      nil
+    else
+      self.shape.exterior_ring.points.map { |point| { :lat => point.latitude, :lng => point.longitude } }
+    end
   end
 
   def self.DirectionAngles

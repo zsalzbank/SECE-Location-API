@@ -25,6 +25,7 @@ class DevicesController < ApplicationController
 
   def create
     @d = Device.new(params[:device])
+    @d.shape = "POLYGON((" +params[:device][:shape].join(", ") + "))" if params[:device][:shape]
     render :json => { :success => @d.save, :errors => @d.errors }
   end
 
