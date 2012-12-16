@@ -31,7 +31,21 @@ class Device < ActiveRecord::Base
   end
 
   def near_distance
-    read_attribute(:near_distance) || 500
+    read_attribute(:near_distance) || self.generated_near_distance
+  end
+
+  def generated_near_distance
+    if self.point?
+      500
+    else
+      if self.circle?
+        area = Math::PI * (self.radius ** 2)
+      else
+        area = self.connection.exec_query("SELECT ST_Area(shape) From devices where id=" + self.id.to_s).first()["st_area"]
+      end
+
+      2 * area.to_f
+    end
   end
 
   def circle?
@@ -54,7 +68,7 @@ class Device < ActiveRecord::Base
     { "front" => 0, "left" => 270, "back" => 180, "right" => 90 }
   end
 
-  def self.direction(device, ops = nil, buffer = 90)
+  def self.operator(device, ops = nil, buffer = 90)
     ops = [ ops ] unless ops.kind_of?(Array)
     buffer = 90 if buffer.blank?
     buffer = buffer.to_f
@@ -63,9 +77,12 @@ class Device < ActiveRecord::Base
     ops.each do |o|
         if Device.DirectionAngles.has_key?(o)
             angle = device.bearing + Device.DirectionAngles[o]
-            location = "ST_GeographyFromText('#{device.location}')"
 
-            relation = relation.where(angle_between("ST_Azimuth(#{location}, location)", angle, buffer))
+            relation = relation.where(angle_between("ST_Azimuth(ST_Centroid(#{device.obj}::geometry), location)", angle, buffer))
+        elsif o == 'on'
+            relation = relation.overlaps(device)
+        elsif o == 'off'
+            relation = relation.overlaps(device, false)
         else
             relation = relation.where(nil)
         end
@@ -73,11 +90,36 @@ class Device < ActiveRecord::Base
     relation
   end
 
+  def obj
+    center = "ST_GeographyFromText('#{self.location}')"
+
+    if self.circle?
+      obj = "ST_Buffer(#{center}, #{self.radius})"
+    elsif self.point?
+      obj = center
+    else
+      obj = "ST_GeographyFromText('#{self.shape}')"
+    end
+
+    obj
+  end
+
+  def self.overlaps(device, overlaps = true)
+    circle_query = "(radius IS NOT NULL AND ST_Overlaps(ST_Buffer(location, radius)::geometry, #{device.obj}::geometry))"
+    shape_query = "(shape IS NOT NULL AND ST_Overlaps(shape::geometry, #{device.obj}::geometry))"
+    modifier = overlaps ? '' : 'NOT '
+
+    where("(#{modifier}(#{circle_query} OR #{shape_query}))")
+  end
+
   def self.max_distance(device, dist = nil)
-    location = "ST_GeographyFromText('#{device.location}')"
     dist = device.near_distance if dist.blank?
 
-    where("ST_DWithin(#{location}, location, #{dist})")
+    point_query = "(radius IS NULL AND shape IS NULL AND ST_DWithin(#{device.obj}, location, #{dist}))"
+    circle_query = "(radius IS NOT NULL AND ST_DWithin(#{device.obj}, ST_Buffer(location, radius), #{dist}))"
+    shape_query = "(shape IS NOT NULL AND ST_DWithin(#{device.obj}, shape, #{dist}))"
+
+    where("(#{point_query} OR #{circle_query} OR #{shape_query})")
   end
 
   def self.altitude(alt = nil, buffer = 5)
@@ -113,7 +155,11 @@ class Device < ActiveRecord::Base
   end
 
   def self.in_area(area)
-    where(Area.contains_query("devices.location", area))
+    point_query = "(devices.radius IS NULL AND devices.shape IS NULL AND " + Area.contains_query("devices.location", area) + ")"
+    circle_query = "(devices.radius IS NOT NULL AND " + Area.contains_query("ST_Buffer(devices.location, devices.radius)", area) + ")"
+    shape_query = "(devices.shape IS NOT NULL AND " + Area.contains_query("devices.shape", area) + ")"
+
+    where("(#{point_query} OR #{circle_query} OR #{shape_query})")
   end
 
   private

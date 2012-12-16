@@ -9,15 +9,8 @@ class Area < ActiveRecord::Base
   validates :radius, :presence => true, :if => :circle?
   validates :shape, :presence => true, :unless => :circle?
 
-  set_rgeo_factory_for_column(
-    :center,
-    RGeo::Geographic.spherical_factory(:srid => 4326)
-  )
-
-  set_rgeo_factory_for_column(
-    :shape,
-    RGeo::Geographic.spherical_factory(:srid => 4326)
-  )
+  set_rgeo_factory_for_column(:center, RGeo::Geographic.spherical_factory(:srid => 4326))
+  set_rgeo_factory_for_column(:shape,  RGeo::Geographic.spherical_factory(:srid => 4326))
 
   def should_generate_new_friendly_id?
     new_record? || name_changed? || parent_changed?
@@ -67,7 +60,7 @@ class Area < ActiveRecord::Base
   end
 
   def self.contains_device_query(d)
-    contains_query("ST_GeographyFromText('#{d.location}')")
+    contains_query(d.obj)
   end
 
   def self.contains_query(l, area = nil)

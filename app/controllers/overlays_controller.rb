@@ -15,6 +15,8 @@ class OverlaysController < ApplicationController
   end
 
   def create
+    params[:overlay][:geoRefA] = "POINT(" + params[:overlay][:geoRefA] + ")"
+    params[:overlay][:geoRefB] = "POINT(" + params[:overlay][:geoRefB] + ")"
     @o = Overlay.new(params[:overlay])
     render :json => { :success => @o.save }
   end

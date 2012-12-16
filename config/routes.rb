@@ -1,14 +1,14 @@
 DeviceLocation::Application.routes.draw do
   match 'areas/devices', :controller => 'areas', :action => 'within'
-  resources :areas, :except => [:new, :edit]
-  match '/areas/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
+  resources :areas, :except => [:new, :edit], :defaults => { :format => 'js' }
+  match '/areas/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}, :defaults => { :format => 'js' }
 
-  resources :overlays, :except => [:new, :edit]
-  match '/overlays/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
+  resources :overlays, :except => [:new, :edit], :defaults => { :format => 'js' }
+  match '/overlays/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}, :defaults => { :format => 'js' }
 
-  match 'devices/lookup', :controller => 'devices', :action => 'lookup'
-  resources :devices, :except => [:new, :edit]
-  match '/devices/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}
+  match 'devices/lookup', :controller => 'devices', :action => 'lookup', :defaults => { :format => 'js' }
+  resources :devices, :except => [:new, :edit], :defaults => { :format => 'js' }
+  match '/devices/:id', :controller => 'devices', :action => 'options', :constraints => {:method => 'OPTIONS'}, :defaults => { :format => 'js' }
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
