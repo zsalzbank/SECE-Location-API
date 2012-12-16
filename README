@@ -1,3 +1,8 @@
+Running the Server
+==================
+To run the server, just execute:
+    rails s
+
 Setting Up For First Time
 =========================
 1.  Install RVM
