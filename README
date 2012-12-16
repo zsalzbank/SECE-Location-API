@@ -1,0 +1,80 @@
+Setting Up For First Time
+=========================
+1.  Install RVM
+    - Execute:
+        curl -L https://get.rvm.io | bash -s stable
+    - Restart all terminals so RVM is sourced into $PATH
+
+2.  Install RVM Requirements
+    - Execute:
+        rvm requirements
+    - Install the dependencies listed for 'Ruby / Ruby HEAD'
+
+3.  Install Ruby
+    - Execute:
+        rvm install 1.9.3
+    - Make it the default ruby installation for the system:
+        rvm --default 1.9.3
+
+4. Install Rails
+    - Execute:
+        gem install rails
+
+5. Install PostgresSQL and Dependencies
+    - Execute:
+        sudo apt-get install postgresql libpq-dev
+    - Install optional admin tools:
+        sudo apt-get install phppgadmin pgadmin3
+
+6. Setup Postrges Administrator Password
+    - Execute:
+        sudo passwd postgres
+    - Use this when authenticating as postgres user in the future.
+
+7. Setup Postgres Access Permissions
+    - Edit /etc/postgresql/9.1/main/pg_hba.conf as the superuser.
+    - Ensure the line starting with:
+        local all postgres
+      ends with:
+        trust
+    - Ensure the line starting with:
+        local all all
+      ends with:
+        md5
+    - Restart postgres server:
+        sudo service postgresql restart
+
+8. Create the User and Database
+    - Open the postgres prompt as the postgres user:
+        su postgres -c psql
+    - Create the user for the database:
+        create user rails with password 'rails';
+    - Create the development and test databases:
+        create database dl_development;
+        create database dl_test;
+    - Grant the user access to the databases:
+        grant all privileges on database dl_development to rails;
+        grant all privileges on database dl_test to rails;
+    - Quit the postgres prompt and return to normal shell:
+        \q
+        exit
+
+9. Update Gems and Database
+    - Follow the steps in 'Things to do After Pulling' below.
+
+
+Things to do After Pulling
+==========================
+1. Install New Gems
+    - Execute:
+        bundle install
+
+2. Migrate the Database
+    - Execute:
+        rake db:migrate
+
+Help!!!
+=======
+- Q: I can't run rvm or rails!!!!
+  A: Your profile might not have been setup correctly.
+     Copy the contents of ~/.bash_profile to the end of ~/.bashrc

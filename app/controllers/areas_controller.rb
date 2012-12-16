@@ -1,19 +1,6 @@
 class AreasController < ApplicationController
   def index
-    @distance = 5000 if not params.has_key?(:distance) else params[:distance].to_f
-    @altitude = params[:altitude] || ""
-
-    if @altitude != ""
-      @altitude = @altitude.to_f
-      @altitude = " AND altitude BETWEEN " + (@altitude - 5).to_s + " AND " + (@altitude + 5).to_s
-    end
-
-    if(params.has_key?(:n) && params.has_key?(:s) && params.has_key?(:e) && params.has_key?(:w))
-        @box = "Geography(ST_Transform(ST_SetSRID(ST_MakeBox2D(ST_MakePoint(" + params[:w] + ", " + params[:s] + "), ST_MakePoint(" + params[:e] + ", " + params[:n] + ")), 4326), 4326))"
-        @areas = Area.where("(circle IS TRUE AND ST_DWithin(center, " + @box + ", ? + radius)) OR (circle IS NOT TRUE AND ST_DWithin(shape, " + @box + ", ?))" + @altitude, @distance, @distance)
-    else
-        @areas = Area.where("1=1" + @altitude)
-    end
+    @areas = Area.all()
   end
 
   def show
@@ -42,11 +29,7 @@ class AreasController < ApplicationController
       render :json => {:error => "Ambiguous or no area found."}
     else
       @area = @areas[0]
-      if @area.circle?
-        @devices = Device.where("ST_Distance(location, ST_GeomFromText(?)) < ?", @area.center.to_s, @area.radius)
-      else
-        @devices = Device.where("ST_Intersects(location, ST_GeomFromText(?))", @area.shape.to_s)
-      end
+      @devices = Device.in_area(@area)
     end
   end
 
