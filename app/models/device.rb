@@ -68,15 +68,16 @@ class Device < ActiveRecord::Base
     { "front" => 0, "left" => 270, "back" => 180, "right" => 90 }
   end
 
-  def self.operator(device, ops = nil, buffer = 90)
+  def self.operator(device, ops = nil, buffer = 90, ref = nil)
     ops = [ ops ] unless ops.kind_of?(Array)
     buffer = 90 if buffer.blank?
     buffer = buffer.to_f
+    ref = device if ref.blank?
 
     relation = clone
     ops.each do |o|
         if Device.DirectionAngles.has_key?(o)
-            angle = device.bearing + Device.DirectionAngles[o]
+            angle = ref.bearing + Device.DirectionAngles[o]
 
             relation = relation.where(angle_between("ST_Azimuth(ST_Centroid(#{device.obj}::geometry), location)", angle, buffer))
         elsif o == 'on'
