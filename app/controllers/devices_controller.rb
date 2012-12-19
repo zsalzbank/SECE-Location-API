@@ -3,7 +3,7 @@ class DevicesController < ApplicationController
     relation = Device
     if params.has_key?(:id)
       device = Device.find_by_id(params[:id])
-      ref = Device.find_by_id(params[:ref]) if params.has_key?(:ref)
+      ref = Device.find_by_id(params[:ref]) if params.has_key?(:ref) and params.has_key?(:operator)
       if device
         relation = relation.operator(device, params[:operator], params[:operator_buffer], ref)
               .max_distance(device, params[:distance])
